@@ -2,11 +2,14 @@
 #include <nRF24L01.h>
 #include <RF24_config.h>
 #include <RF24.h>
-
 #include <SPI.h>
-//#include <nRF24L01.h>
-#include <RF24.h>
-
+//
+// Written by: Mike Studer
+//
+// Documentation
+// http://tmrh20.github.io/RF24/classRF24.html
+// https://www.arduino.cc/en/Reference/SPI
+//
 //
 // Hardware configuration
 //
@@ -19,7 +22,7 @@ int k = 0;
 // Single radio pipe address for the 2 nodes to communicate.
 const uint64_t pipe = 0xDEADBEEF00LL;
 char* rx_data = "NONE";
-uint8_t rx_len = 4;
+//uint8_t rx_len = sizeof(rx_data);
 // CHANNEL NUMBER
 const unsigned int chnl = 100; // Channel to use. 127 is max.
 
@@ -52,31 +55,29 @@ void setup(void)
 void loop(void)
 {
   // Check if there is data ready
-  if ( radio.available() )
-  {   
-    bool done = false;
-    if (radio.available())
-    {     
-      // Fetch the payload
-      radio.read( rx_data, rx_len );
-      
-    }
-      if (( strncmp(rx_data, "Enable", rx_len) == 0)  && (digitalRead(3) == 0)){       
-          digitalWrite( 3, HIGH );
-          delay(100);
-          rx_data = "NONE";
-         rx_len = 4;
-      }else
-      if (( strncmp(rx_data, "Off", rx_len) == 0 ) && (digitalRead(3) == 1)){
-        // Check to see if pin is already low.
-          digitalWrite( 3, LOW );         
-          rx_data = "NONE";
-          rx_len = 4;
-      }   
-      rx_data = "NONE";
-      rx_len = 4;
-    
+ if ( radio.available() )
+  {
+    // Fetch the payload
+    //radio.read( rx_data, rx_len );
+    radio.read(&rx_data,sizeof(rx_data));
   }
+  if (( strncmp(rx_data, "Enable", sizeof(rx_data)) == 0)  && (digitalRead(3) == 0)) 
+  {
+    digitalWrite( 3, HIGH );
+    delay(100);
+    rx_data = "NONE";
+    //rx_len = sizeof(rx_data);
+  } else if (( strncmp(rx_data, "Off", sizeof(rx_data)) == 0 ) && (digitalRead(3) == 1)) 
+  {
+    // Check to see if pin is already low.
+    digitalWrite( 3, LOW );
+    rx_data = "NONE";
+    //rx_len = sizeof(rx_data);
+  }
+  rx_data = "NONE";
+  //rx_len = sizeof(rx_data);
 
 }
+
+
 
